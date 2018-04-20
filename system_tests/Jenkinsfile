@@ -2,7 +2,7 @@ pipeline {
     agent { 
         node { 
             label 'docker-runner' 
-            customWorkspace "${JENKINS_HOME}/Workspace/${JOB_NAME}/${BRANCH_NAME}"
+            customWorkspace "/var/jenkins/workspace/${JOB_NAME}"
         }
     }
     parameters {
