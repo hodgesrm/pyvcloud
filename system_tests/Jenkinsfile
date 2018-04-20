@@ -1,0 +1,80 @@
+pipeline {
+    agent { 
+        node { 
+            label 'docker-runner' 
+            customWorkspace "${JENKINS_HOME}/Workspace/${JOB_NAME}/${BRANCH_NAME}
+        }
+    }
+    parameters {
+        string(name: 'BUILD_GIT_URL', defaultValue: 'https://github.com/vmware/pyvcloud', 
+            description: 'Repo URL')
+        string(name: 'BUILD_GIT_BRANCH', defaultValue: 'master', 
+            description: 'Repo Branch')
+    }
+    stages {
+        stage('install') {
+            steps {
+                // Echo various environmental settings. 
+                echo "BUILD_GIT_URL: ${params.BUILD_GIT_URL}"
+                echo "BUILD_GIT_BRANCH: ${params.BUILD_GIT_BRANCH}"
+                sh "python3 --version"
+                sh "rm -rf test-env"
+                sh "python3 -m venv test-env"
+
+                sh """
+                    . test-env/bin/activate
+                    rm -rf test-repo
+                    git clone ${params.BUILD_GIT_URL} test-repo
+                    cd test-repo
+                    git checkout ${params.BUILD_GIT_BRANCH}
+                    pip3 install -r requirements.txt
+                    python setup.py install
+                """
+            }
+        }
+        stage('run-tox-flake8') {
+            steps {
+                sh """
+                    . test-env/bin/activate
+                    cd test-repo
+                    pip3 install -r test-requirements.txt
+                    tox -e flake8
+                """
+            }
+        }
+        stage('run-samples') {
+            steps {
+                sh """
+                    set +x
+                    . test-env/bin/activate
+                    cd test-repo
+                    /home/jenkins/vcd-python-builds/scripts/pyvcloud_run_samples.sh /home/jenkins/vcd_connection
+                """
+            }
+        }
+        stage('run-system-test') {
+            steps {
+                sh """
+                    set +x
+                    . test-env/bin/activate
+                    cd test-repo
+                    /home/jenkins/vcd-python-builds/scripts/pyvcloud_run_system_tests.sh /home/jenkins/vcd_connection
+                """
+            }
+        }
+        stage('cleanup') {
+            steps {
+                echo "We don't do any clean-up for now."
+            }
+        }
+    }
+    post { 
+        failure { 
+            echo 'Emailing build master after failed build'
+        }
+        success { 
+            echo 'This could clean up our vCD installation...'
+            echo "So...This is where we could restore the vCD installation snapshot!"
+        }
+    }
+}
