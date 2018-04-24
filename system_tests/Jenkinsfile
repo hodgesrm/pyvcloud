@@ -14,6 +14,8 @@ pipeline {
     stages {
         stage('checkout') {
             steps {
+                echo "GIT_URL: ${params.GIT_URL}"
+                echo "BRANCH_NAME: ${params.BRANCH_NAME}"
                 checkout([
                     $class: 'GitSCM',
                     branches: scm.branches
