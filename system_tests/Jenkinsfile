@@ -33,10 +33,6 @@ pipeline {
 
                 sh """
                     . test-env/bin/activate
-                    rm -rf test-repo
-                    git clone ${params.BUILD_GIT_URL} test-repo
-                    cd test-repo
-                    git checkout ${params.BUILD_GIT_BRANCH}
                     pip3 install -r requirements.txt
                     python setup.py install
                 """
@@ -46,7 +42,6 @@ pipeline {
             steps {
                 sh """
                     . test-env/bin/activate
-                    cd test-repo
                     pip3 install -r test-requirements.txt
                     tox -e flake8
                 """
@@ -57,7 +52,6 @@ pipeline {
                 sh """
                     set +x
                     . test-env/bin/activate
-                    cd test-repo
                     /home/jenkins/vcd-python-builds/scripts/pyvcloud_run_samples.sh /home/jenkins/vcd_connection
                 """
             }
@@ -67,7 +61,6 @@ pipeline {
                 sh """
                     set +x
                     . test-env/bin/activate
-                    cd test-repo
                     /home/jenkins/vcd-python-builds/scripts/pyvcloud_run_system_tests.sh /home/jenkins/vcd_connection
                 """
             }
