@@ -14,11 +14,12 @@ pipeline {
     stages {
         stage('checkout') {
             steps {
-                echo "GIT_URL: ${params.GIT_URL}"
-                echo "BRANCH_NAME: ${params.BRANCH_NAME}"
-                checkout([
-                    $class: 'GitSCM'
-                    ])
+                echo "GIT_URL: ${GIT_URL}"
+                echo "BRANCH_NAME: ${BRANCH_NAME}"
+                checkout scm
+                //checkout([
+                //    $class: 'GitSCM'
+                //    ])
             }
         }
         stage('install') {
