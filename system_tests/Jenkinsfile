@@ -14,9 +14,10 @@ pipeline {
     stages {
         stage('checkout') {
             steps {
-                echo "GIT_URL: ${GIT_URL}"
-                echo "BRANCH_NAME: ${BRANCH_NAME}"
+                deleteDir()
                 checkout scm
+                sh "git config --list"
+                sh "git branch"
                 //checkout([
                 //    $class: 'GitSCM'
                 //    ])
