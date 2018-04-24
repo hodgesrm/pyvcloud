@@ -12,6 +12,14 @@ pipeline {
             description: 'Repo Branch')
     }
     stages {
+        stage('checkout') {
+            steps {
+                checkout([
+                    $class: 'GitSCM',
+                    branches: scm.branches
+                    ])
+            }
+        }
         stage('install') {
             steps {
                 // Echo various environmental settings. 
